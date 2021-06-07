@@ -1,0 +1,2 @@
+make clean; make
+tsim-leon3 resident_sw -c fbatch | multy

@@ -1,0 +1,56 @@
+mainmenu "RSW Configuration"
+
+source "Kconfig"
+
+menu "RSW memory layout"
+
+config CONTAINER_ADDR
+       hex "Container physical location address"
+       default "0x4000"
+       depends on STAND_ALONE||CONTAINER_AT_FIXED_ADDR
+
+config RDONLY_SEC_ADDR
+       hex "Read-only section addresses"
+       default "0x40200000"
+
+config RW_SEC_ADDR
+       hex "Read/write section addresses"
+       default "0x40090000"
+
+endmenu
+
+config OUTPUT_ENABLED
+       bool "Enable RSW output"
+       default y
+
+config CPU_FREQ_AUTO
+       bool "Autodetect CPU frequency"
+       default y
+
+config CPU_KHZ
+       int "CPU frequency (KHz)"
+       default "50000"
+       depends on OUTPUT_ENABLED&&!CPU_FREQ_AUTO
+
+choice
+	prompt "Enable UART support"
+	default UART1
+        depends on OUTPUT_ENABLED
+
+config UART1
+       bool "UART1"
+config UART2
+       bool "UART2"
+
+endchoice
+
+config UART_FLOWCONTROL
+       bool "Enable UART flow control"
+       depends on OUTPUT_ENABLED
+       default y
+
+config UART_BAUDRATE
+       int "UART baud rate"
+       default "115200"
+       depends on OUTPUT_ENABLED
+

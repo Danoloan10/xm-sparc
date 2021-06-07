@@ -1,0 +1,106 @@
+Changelog
+=========
+XM-Q-1.0.7 to XM-Q-1.0.8
+------------------------
+- SPR-121115-02: Document the hardware timers used by XtratuM in multiprocessing
+  options.
+
+- SPR-160408-01: Update system state figure in the user manual.
+
+- SPR-160609-01: Fix a problem mapping the last megabyte of memory.
+
+- SPR-160613-01: Document in the user manual the method used by XtratuM 
+  to map the memory areas.
+
+- SPR-160720-01: Document in the user manual the hardware state asumed 
+  by XtratuM at entry point.
+
+-  CP-161202-01: The maximum number of custom files is configurable in the XtratuM 
+  configuration menu.
+
+- SPR-170201-01: Fix an issue where the resetStatus of the partition after the system
+  is warm reset by a health monitor event was 1 instead of 0.
+
+-  CP-170206-01: Add support for print float in XAL.
+
+-  CP-170704-01: Upgrade the toolchain used to compile XtratuM to BCC 1.0.46 (GCC 4.4.2).
+
+-  CP-170704-02: Implement workaround for the GRLIB-TN-0009 "LEON3FT stale 
+  cache entry after store with a data tag parity error".
+
+
+XM-Q-1.0.6 to XM-Q-1.0.7
+------------------------
+
+-  CP-160411-01: Redefine the value of field resetStatus of xmPartition_t struct.
+  The user manual has been updated to provide more information. 
+
+- SPR-160408-02: Fix issue where no EDAC events (traps) was handled as EDAC error,
+  instead it was handled as configured in the HM.
+
+-  CP-080316-01: The MIL 1553 support external clock of 20Mhz. The user manual
+  has been updated to provide more information.
+
+-  CP-250216-01: Add the XtratuM watchdog mechanism to XtratuM. The user
+  manual and the reference manual have been updated to provide further
+  details of this new feature.
+
+- SPR-180216-03: The user manual has been updated to provide information about
+  the '-e' option of xmcparser tool
+
+- SPR-1080216-02: Improve the performance of XM_memory_copy hypercall. The 
+  reference manual has been update to reflect the changes.
+
+- SPR-080216-02: The reference manaual has been update to provide more 
+  information about xm_sparc_set_psr and xm_sparc_get_psr hypercall behaviour.
+
+- SPR-080216-01: Remove fixed size of configuration structs in asm code.
+
+
+XM-Q-1.0.5 to XM-Q-1.0.6
+------------------------
+
+- SPR-111215-04:  Update the  HM events  (listed) in  user manual  and
+  reference manual.
+
+- SPR-111215-03: FLUSH_TLB ASI corrected for GR712RC
+
+- SPR-031215-02: HM does not correctly reset partitions when the entry
+  point has been updated by XM_reset_partition service.
+
+- SPR-031215-01:  The User  Manual  has been  update  to provide  more
+  information about the field statusReset of the partition and the way
+  it is updated.
+
+- SPR-021215-01: The Reference Manual has been updated to provide more
+  information    about    the    behaviour   and    requirements    of
+  XEF_load_partition when the partition is compressed.
+
+- SPR-251115-01: XAL rules.mk hardcodes the name of xm_cf in the
+  .bin.xmc and .c.xmc rules. Fixed.
+
+- SPR-241115-02:  Added optional  selectable behaviour  when a  system
+  cold reset is performed. XM calls  a function provided by the system
+  designer.
+
+- SPR-241115-01: Reference manual section  order restored respect XM-Q
+  predefined  order.  (A subsection  was  moved  with respect  another
+  invalidating external references of other documents).
+
+- SPR-061115-01: User  manual updated to describe  the scenarios where
+  XM_CF is not found or resident_sw provided by the XM_CF is invalid.
+
+- SPR-021115-01: User manual updated  to provide further details about
+  external synchronisation.
+
+- SPR-221015-01: Support of EDAC in the core.
+
+- SPR-290915-01: Remove libgcc.a dependencies from core and xal
+
+- SPR-110915-01:   Ipvi  facility   is  optional   (choosen  at   XM's
+  configuration process)
+
+- SPR-081015-01: xmcparser does not check whether the partition's entry 
+      point has been defined within the partition's memory areas or not.
+
+- SPR-141015-01: rsw not longer updates MCFG* registers for GR712RC board.

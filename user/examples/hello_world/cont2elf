@@ -1,0 +1,26 @@
+#!/bin/bash
+# script to load the container at 0xaddr
+
+CONFIG=$1
+IFILE=$2
+OFILE=$3
+
+. $CONFIG
+
+if test -z "$CONFIG_STAND_ALONE"; then
+	echo $(basename $0): error not stand alone
+	exit
+fi
+
+TMP=$(mktemp /tmp/cont2elf.XXX)
+cat >$TMP.S <<EOF
+.global _start
+_start:
+EOF
+
+echo $(basename $0): $OFILE loads $IFILE at $CONFIG_CONTAINER_ADDR
+
+sparc-linux-gcc -c $TMP.S -o $TMP.o
+sparc-linux-objcopy --add-section=.container=$IFILE --set-section-flags=.container=load,alloc $TMP.o
+sparc-linux-ld $TMP.o -o $OFILE -Ttext=$CONFIG_CONTAINER_ADDR
+

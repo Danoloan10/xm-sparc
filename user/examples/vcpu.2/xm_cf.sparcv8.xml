@@ -1,0 +1,47 @@
+<SystemDescription xmlns="http://www.xtratum.org/xm-3.x"
+		   version="1.0.0" name="hello_world">
+  <HwDescription>
+    <MemoryLayout>
+        <Region type="stram" start="0x40000000" size="20MB"/>
+      </MemoryLayout>
+    <ProcessorTable>
+      <Processor id="0" frequency="80Mhz">
+	  <CyclicPlanTable>
+	    <Plan id="0" majorFrame="2000ms">
+	      <Slot id="0" start="0ms" duration="500ms" partitionId="5" vCpuId="0" />
+	      <Slot id="1" start="500ms" duration="500ms" partitionId="5" vCpuId="1" />
+              <Slot id="2" start="1000ms" duration="500ms" partitionId="8" vCpuId="0" />
+	      <Slot id="3" start="1500ms" duration="500ms" partitionId="8" vCpuId="1" />
+	    </Plan>
+	  </CyclicPlanTable>
+      </Processor>
+    </ProcessorTable>
+     <Devices>
+	 <Uart id="0" baudRate="115200" name="Uart" /> 
+<!--	 <Uart id="1" baudRate="115200" name="Uart1" /> -->
+       </Devices>          
+    </HwDescription>
+
+  <XMHypervisor console="Uart" >
+    <PhysicalMemoryArea size="256KB" />
+  </XMHypervisor>
+
+  <!-- <track id="hello-xml-sample">-->
+  <PartitionTable>
+    <Partition id="5" name="Partition1" flags="system boot fp" console="Uart">
+      <PhysicalMemoryAreas>
+	<Area start="0x40080000" size="256KB" flags="flag1"/>
+      </PhysicalMemoryAreas>
+      <TemporalRequirements duration="500ms" period="500ms"/>
+    </Partition>
+
+    <Partition id="8" name="Partition2" flags="system boot dcache_disabled icache_disabled" console="Uart">
+      <PhysicalMemoryAreas>
+        <Area start="0x401c0000" size="256KB"/>
+      </PhysicalMemoryAreas>
+      <TemporalRequirements duration="500ms" period="500ms"/>
+    </Partition>
+
+  </PartitionTable>
+   <!-- </track id="hello-xml-sample">-->
+</SystemDescription>

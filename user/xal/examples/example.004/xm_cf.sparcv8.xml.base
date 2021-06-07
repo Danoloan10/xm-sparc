@@ -1,0 +1,80 @@
+<SystemDescription xmlns="http://www.xtratum.org/xm-3.x" version="1.0.0" name="channels">
+
+    <HwDescription>
+        <MemoryLayout>
+            <Region type="rom" start="0x0" size="4MB" />
+            <Region type="sdram" start="0x40000000" size="4MB" />
+        </MemoryLayout>
+        <ProcessorTable>
+            <Processor id="0" frequency="80Mhz">
+                <CyclicPlanTable>
+                    <Plan id="0" majorFrame="1500ms">
+                        <Slot id="0" start="0ms" duration="500ms" partitionId="0" />
+                        <Slot id="1" start="500ms" duration="500ms" partitionId="1" />
+                        <Slot id="2" start="1000ms" duration="500ms" partitionId="2" />
+                    </Plan>
+                </CyclicPlanTable>
+            </Processor>
+        </ProcessorTable>
+        <Devices>
+            <Uart id="0" baudRate="115200" name="Uart" />
+        </Devices>
+    </HwDescription>
+
+    <XMHypervisor console="Uart">
+        <PhysicalMemoryArea size="1MB" />
+#if defined(CONFIG_MPU) && defined(CONFIG_AT697F)
+        <SharedMemoryAreas>
+            <Area start="0x40200000" size="128KB"/>
+        </SharedMemoryAreas>
+#endif
+    </XMHypervisor>
+
+    <PartitionTable>
+        <Partition id="0" name="Partition0" flags="boot" console="Uart" entryPoint="0x40180000">
+            <PhysicalMemoryAreas>
+                <Area start="0x40180000" size="128KB" />
+            </PhysicalMemoryAreas>
+            <PortTable>
+                <Port type="queuing" direction="source" name="portQ"/>
+                <Port type="sampling" direction="source" name="portS"/>
+            </PortTable>
+        </Partition>
+        <Partition id="1" name="Partition1" flags="boot" console="Uart" entryPoint="0x401a0000">
+            <PhysicalMemoryAreas>
+                <Area start="0x401A0000" size="128KB" />
+#ifdef CONFIG_MMU
+                <Area start="0x40200000" size="128KB" />
+#endif
+            </PhysicalMemoryAreas>
+            <PortTable>
+                <Port type="sampling" direction="destination" name="portS"/>
+                <Port type="queuing" direction="destination" name="portQ"/>
+            </PortTable>
+        </Partition>
+        <Partition id="2" name="Partition2" flags="boot" console="Uart" entryPoint="0x401c0000">
+            <PhysicalMemoryAreas>
+                <Area start="0x401C0000" size="128KB" />
+#ifdef CONFIG_MMU
+                <Area start="0x40200000" size="128KB" />
+#endif
+            </PhysicalMemoryAreas>
+            <PortTable>
+                <Port type="sampling" direction="destination" name="portS"/>
+            </PortTable>
+        </Partition>
+    </PartitionTable>
+    
+    <Channels>
+        <QueuingChannel maxNoMessages="16" maxMessageLength="128B">
+            <Source partitionId="0" portName="portQ"/>
+            <Destination partitionId="1" portName="portQ"/>
+        </QueuingChannel>
+        <SamplingChannel maxMessageLength="128B">
+            <Source partitionId="0" portName="portS"/>
+            <Destination partitionId="1" portName="portS"/> 
+            <Destination partitionId="2" portName="portS"/> 
+        </SamplingChannel>
+    </Channels>
+    
+</SystemDescription>

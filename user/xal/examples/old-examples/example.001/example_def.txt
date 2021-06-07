@@ -1,0 +1,33 @@
+# Example : 001
+
+# Description
+
+This example shows the ability to execute several partitions concurrently according to a scheduling plan defined in the CT. 
+
+# Partition definition
+Three independent partitions with the same code are built. 
+Each partition performs an infinite loop increasing the value of an  integer variable.
+This variable is printed at the beginning of each loop.
+P1 is supervisor. 
+P2 and P3 are user partitions.
+
+Termination: Each partition finishes when a counter value is reached (Halt partition). 
+
+# Configuration table
+Basic configuration. Partitions are defined to be executed at different memory addresses.
+P1 is defined as supervisor. 
+P2 and P3 are not supervisors.
+
+A scheduling plan is defined under the following premises:
+
+MAF = 500 msec 		
+P1: S   0 ms  D 200 ms  
+P2: S 200 ms  D 100 ms  
+P3: S 300 ms  D  50 ms  
+
+
+# Expected results
+\xm{} will load, initialise and run in user mode the partitions. 
+During the execution, partitions will print the counter value.
+When the counter limit is achieved, the partitions halt.
+

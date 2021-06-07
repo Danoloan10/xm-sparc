@@ -1,0 +1,18 @@
+# Changelog:
+#  - [02/10/2015:SPR-021015-01] USE_XEF_EPOINT added
+config STACK_SIZE
+       int "Stack size (KB)"
+       default "8"
+
+config STAND_ALONE
+       bool "Stand-alone version"
+       default no
+
+config CONTAINER_AT_FIXED_ADDR
+       bool "Load container at a fixed address"
+       default y
+
+config USE_XEF_EPOINT
+       bool "Update partition entry point with XEF"
+
+source "../../../core/Kconfig.ver"

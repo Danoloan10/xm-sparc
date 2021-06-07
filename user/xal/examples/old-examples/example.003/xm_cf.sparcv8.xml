@@ -1,0 +1,91 @@
+<SystemDescription xmlns="http://www.xtratum.org/xm-3.x" version="1.0.0" name="Test_10.1">
+  
+  <HwDescription>
+    <MemoryLayout>
+	   <Region type="rom" start="0x0" size="4MB" />
+	   <Region type="stram" start="0x40000000" size="4MB"/>
+	   <Region type="sdram" start="0x60000000" size="4MB"/>
+    </MemoryLayout>
+    <ProcessorTable>
+      <Processor id="0" frequency="50Mhz">
+        <CyclicPlanTable>
+          <Plan id="0" majorFrame="800ms">
+	    <Slot id="0" start="0ms" duration="100ms" partitionId="0"/>
+	    <Slot id="1" start="200ms" duration="100ms" partitionId="1"/>
+	    <Slot id="2" start="400ms" duration="100ms" partitionId="2"/>
+	    <Slot id="3" start="600ms" duration="100ms" partitionId="0"/>
+          </Plan>
+        </CyclicPlanTable>
+      </Processor>
+    </ProcessorTable>
+
+    
+    
+    <Devices>
+      <Uart id="0" baudRate="115200" name="Uart" />
+      <MemoryBlock name="MemCont" start="0x4000" size="256KB" />
+    </Devices>
+</HwDescription>
+<XMHypervisor console="Uart">
+        <PhysicalMemoryArea size="1MB"/>
+</XMHypervisor>
+
+
+
+
+
+<PartitionTable>
+  <Partition id="0" flags="system"  name="Partition1"      console="Uart">
+    <PhysicalMemoryAreas>
+      <Area start="0x40180000" size="128KB"/>
+    </PhysicalMemoryAreas>
+    <TemporalRequirements duration="200ms" period="500ms"/>
+    <PortTable>
+      <Port name="sport1_w" type="sampling" direction="source" />
+      <Port name="sport2_r" type="sampling" direction="destination" />
+      <Port name="sport3_r" type="sampling" direction="destination" />
+    </PortTable>
+  </Partition>
+  
+  <Partition id="1"  name="Partition2"      console="Uart">
+    <PhysicalMemoryAreas>
+      <Area start="0x401A0000" size="128KB"/>
+    </PhysicalMemoryAreas>
+    <TemporalRequirements duration="200ms" period="500ms"/>
+    <PortTable>
+      <Port name="sport1_r" type="sampling" direction="destination" />
+      <Port name="sport2_w" type="sampling" direction="source" />
+    </PortTable>
+  </Partition>
+  
+  <Partition id="2"  name="Partition3"       console="Uart">
+    <PhysicalMemoryAreas>
+      <Area start="0x401c0000" size="128KB"/>
+    </PhysicalMemoryAreas>
+    <TemporalRequirements duration="100ms" period="500ms"/>
+    <PortTable>
+      <Port name="sport1_r" type="sampling" direction="destination" />
+      <Port name="sport3_w" type="sampling" direction="source" />
+    </PortTable>
+  </Partition>
+</PartitionTable>
+
+<Channels>
+  <SamplingChannel maxMessageLength="12B" refreshPeriod="1s">
+    <Source partitionId="0" portName="sport1_w"/>
+    <Destination partitionId="1" portName="sport1_r"/>
+    <Destination partitionId="2" portName="sport1_r"/>
+  </SamplingChannel>
+  <SamplingChannel maxMessageLength="12B" refreshPeriod="1s">
+    <Source partitionId="1" portName="sport2_w"/>
+    <Destination partitionId="0" portName="sport2_r"/>
+  </SamplingChannel>
+  <SamplingChannel maxMessageLength="12B" refreshPeriod="1s">
+    <Source partitionId="2" portName="sport3_w"/>
+    <Destination partitionId="0" portName="sport3_r"/>
+  </SamplingChannel>
+</Channels>
+
+
+    
+</SystemDescription>

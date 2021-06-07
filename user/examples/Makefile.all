@@ -1,0 +1,43 @@
+all: examples
+
+DIRS=\
+	clocks\
+	custom_files\
+	cswitch\
+	fp\
+	hello_world\
+	hm\
+	hwirq\
+	ioports\
+	queuing_ports\
+	reset\
+	reset_system\
+	sampling_ports\
+	sched_events\
+	shutdown_part\
+	status\
+	taintedstack\
+	timers\
+	tracing\
+	xm_memcpy\
+
+examples:
+	@for dir in $(DIRS) ; do \
+		(cd $$dir; make $(MAKECMDGOALS)); \
+	done
+
+clean:
+	@$(RM) *.o *~ common/*.o common/*~ $(ARCH)/*.o $(ARCH)/*~
+	@for dir in $(DIRS) ; do \
+		(cd $$dir; make $(MAKECMDGOALS)); \
+	done
+
+distclean:
+	@find -name "*.o" -exec rm '{}' \;
+	@find -name "*~" -exec rm '{}' \;
+	@find -name "*.xmc.c" -exec rm '{}' \;
+	@find -name "*.bin" -exec rm '{}' \;
+	@find -name "partition?" -exec rm '{}' \;
+	@find -name "xm_cf" -exec rm '{}' \;
+	@find -name "resident_sw" -exec rm '{}' \;
+	@find -name "dep.mk" -exec rm '{}' \;

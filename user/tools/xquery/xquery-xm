@@ -1,0 +1,230 @@
+#!/bin/bash
+# xquery update script to convert xm_cf.sparcv8.xml
+# input: files from xm-2.2
+# output: files from xm-2.3
+
+# TODO ...
+
+function xq()	{ $(dirname $0)/xq $*; }
+function warn()	{ echo $* 1>&2; }
+function usage(){ echo "usage: xquery-xm [-f] [-i xm_cf.in.xml] [-o xm_cf.out.xml]"; }
+
+if ! which xqilla >/dev/null 2>&1; then
+	warn $(basename $0): xqilla not found
+	exit 1
+fi
+
+forceflag=false	# force overriding infile with outfile
+ifile=xm_cf.sparcv8.xml
+ofile=xm_cf.mod.xml
+while getopts 'i:o:fh' c
+do
+	case $c in
+	f)	forceflag=true;;
+	i)	ifile="$OPTARG";;
+	o)	ofile="$OPTARG";;
+	h|?)	usage; exit;;
+	esac
+done
+shift $(($OPTIND - 1))
+
+if ! test -r "$ifile"; then
+	warn $(basename $0): warning $ifile not found
+	exit 2
+fi
+
+if ! $forceflag && test -r "$ofile"; then
+	warn $(basename $0): warning $ofile exists
+	exit 2
+fi
+
+# problems with namespace xmlns
+cp $ifile $ofile
+sed -i 's|xmlns="http://www.xtratum.org/xm-2.3"||' $ofile
+
+# simple test
+#xq 'for $desc in doc("'$ofile'")/SystemDescription return $desc'
+
+# move /SystemDescription/XMHypervisor/HwDescription
+xq 'declare variable $root := doc("'$ofile'")/SystemDescription;
+    for $h in $root/XMHypervisor/HwDescription
+    return (
+	insert node $h as first into $root,
+	delete node $h
+    )'
+
+# move /SystemDescription/Devices
+xq 'declare variable $root := doc("'$ofile'")/SystemDescription;
+    for $d in $root/Devices
+    return (
+    	insert node $d as last into $root/HwDescription,
+	delete node $d
+    )'
+
+# comment /SystemDescription/HwDescription/MemoryLayout/Region[@name=sdram]
+xq 'declare variable $root := doc("'$ofile'")/SystemDescription;
+    for $r in $root/HwDescription/MemoryLayout/Region
+    return
+	if($r/@type = "STRAM")
+	then replace value of node $r/@type with "stram"
+	else replace node $r with <!-- <Region size="{$r/@size}" start="{$r/@start}" type="{$r/@type}" -->
+    '
+ 
+# replace /SystemDescription/HwDescription/Devices/LeonUart
+xq 'declare variable $root := doc("'$ofile'")/SystemDescription;
+    for $l in $root/HwDescription/Devices/LeonUart
+    return replace node $l with <Uart id="0" baudRate="112500" name="Uart"/>'	
+
+# move /SystemDescription/HwDescription/Devices/MemoryBlockTable
+xq 'declare variable $root := doc("'$ofile'")/SystemDescription;
+    for $b in $root/HwDescription/Devices/MemoryBlockTable/Block
+    return (
+    	insert node $b as last into $root/HwDescription/Devices,
+	delete node $b
+    ),
+    delete node $root/HwDescription/Devices/MemoryBlockTable'
+
+xq 'declare variable $root := doc("'$ofile'")/SystemDescription;
+    for $b in $root/HwDescription/Devices/Block
+    return rename node $b as "MemoryBlock"'
+
+# delete attrs from /SystemDescription/PartitionTable
+# add attr flags="system" if Partition/@supervisor = "yes"
+xq 'for $p in doc("'$ofile'")/SystemDescription/PartitionTable/Partition
+    return (
+	delete node $p/@boot,
+	delete node $p/@processor,
+	delete node $p/@imageId,
+	delete node $p/@headerAddr,
+	delete node $p/@headerOffset,
+	delete node $p/@loadPhysAddr,
+	delete node $p/@flags,
+	if ($p/@supervisor = "yes") 
+		then insert node attribute flags {"system"} into $p
+		else insert node attribute flags {""} into $p,
+	delete node $p/@supervisor
+    )'
+
+# rename node $p/HealthMonitoring as "HealthMonitor"
+xq 'declare variable $root := doc("'$ofile'")/SystemDescription;
+
+    for $h in $root/PartitionTable/Partition/HealthMonitoring
+    return rename node $h as "HealthMonitor",
+
+    for $h in $root/PartitionTable/Partition/@healthMonitoringDevice
+    return rename node $h as "healthMonitorDevice",
+
+    for $t in $root/PartitionTable/Partition/Trace
+    return rename node $t/@bitmask as "mask"'
+
+# rename /SystemDescription/PartitionTable/Partition/Interrupts
+xq 'for $p in doc("'$ofile'")/SystemDescription/PartitionTable/Partition
+    let $ids := $p/HwResources/Interrupts/Line/@id
+    let $irqs := (for $i in $ids return number($i))
+
+    return
+    if(exists($irqs)) then
+    (
+    	insert node <Interrupts lines="{$irqs}" /> as last into $p/HwResources,
+	delete node $p/HwResources/Interrupts
+    )
+    else ()
+    '
+
+xq 'declare variable $root := doc("'$ofile'")/SystemDescription;
+
+    for $h in $root/XMHypervisor/@healthMonitoringDevice
+    return rename node $h as "healthMonitorDevice",
+    for $b in $root/XMHypervisor/Trace/@bitmask
+    return rename node $b as "mask",
+
+    delete node $root/XMHypervisor/@loadPhysAddr,
+    delete node $root/ResidentSw/@entryPoint,
+
+    for $b in $root/XMHypervisor/Binary return delete node $b,
+    for $b in $root/PartitionTable/Partition/Binary return delete node $b,
+    for $b in $root/ResidentSw/Binary return delete node $b
+    '
+
+# detect & fix: partition id (1) shall be consecutive starting from 0
+xq 'declare variable $root := doc("'$ofile'")/SystemDescription;
+    let $partids := ( for $id in $root/PartitionTable/Partition/@id return number($id) )
+    
+    for $i in $partids
+	for $p in $root/PartitionTable/Partition[@id = $i]
+	let $newid := $i - min($partids)
+	return (
+		replace value of node $p/@id with $newid,
+		replace value of node $p/@name with concat("Partition", $newid),
+
+		for $s in $root/HwDescription/Processor/Sched/CyclicPlan/Plan/Slot[@partitionId = $p/@id]
+		return (
+			replace value of node $s/@partitionId with $newid
+		),
+
+		for $qc in $root/Channels/QueuingChannel/Source[@partitionId = $p/@id]
+		return replace value of node $qc/@partitionId with $newid,
+
+		for $qc in $root/Channels/QueuingChannel/Destination[@partitionId = $p/@id]
+		return replace value of node $qc/@partitionId with $newid,
+
+		for $sc in $root/Channels/SamplingChannel/Source[@partitionId = $p/@id]
+		return replace value of node $sc/@partitionId with $newid,
+
+		for $sc in $root/Channels/SamplingChannel/Destination[@partitionId = $p/@id]
+		return replace value of node $sc/@partitionId with $newid
+	)
+   '
+
+# detect & fix: slot id (1) shall be consecutive starting from 0
+xq 'declare variable $root := doc("'$ofile'")/SystemDescription;
+    let $slots := $root/HwDescription/Processor/Sched/CyclicPlan/Plan/Slot
+
+    for $id in (0 to count($slots) - 1)
+    	for $s in $slots[$id+1]
+	return replace value of node $s/@id with $id
+   '
+
+# move /SystemDescription/HwDescription/Processor
+xq 'declare variable $root := doc("'$ofile'")/SystemDescription;
+    insert node <ProcessorTable><!-- --></ProcessorTable> as first into $root/HwDescription
+   '
+
+xq 'declare variable $root := doc("'$ofile'")/SystemDescription;
+    for $p in $root/HwDescription/Processor
+    return (
+	insert node $p as last into $root/HwDescription/ProcessorTable,
+	delete node $p
+    )'
+
+# remove Plan/@name
+xq 'declare variable $root := doc("'$ofile'")/SystemDescription;
+    delete node $root/HwDescription/ProcessorTable/Processor/Sched/CyclicPlan/Plan/@name
+   '
+
+# xml indent & tab
+cat >/tmp/indent.xsl <<EOF
+<!-- xml indent: http://vim.wikia.com/wiki/Indenting_source_code -->
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	<xsl:output method="xml" indent="yes"/>
+	<xsl:strip-space elements="*"/>
+	<xsl:template match="/">
+		<xsl:copy-of select="."/>
+	</xsl:template>
+</xsl:stylesheet>
+EOF
+
+xsltproc /tmp/indent.xsl $ofile | sed 's|  |	|g' > $ofile.indent
+mv $ofile.indent $ofile
+
+# add back xmlns
+# xq 'insert node attribute xmlns {"http://www.xtratum.org/xm-2.3"} into doc("'$ofile'")/SystemDescription'
+sed -i 's|^<SystemDescription|<SystemDescription xmlns="http://www.xtratum.org/xm-3.x"|' $ofile
+
+sed -i '/<?xml version="1.0"?>/d' $ofile
+
+if $forceflag; then
+	# save backup in xm_cf.sparcv8.xml.orig
+	cp $ifile $ifile.orig
+	mv $ofile $ifile
+fi

@@ -1,0 +1,170 @@
+#
+#  Changelog:
+#  - [05/08/2015:SPR-010915-01] New 1553 driver configuration parameters added
+#  - [29/03/2016:CP-250216-01] GR712-RC Watchdog driver added
+#
+menu "Drivers"
+
+config DEV_UART
+       tristate "Enable UART driver"
+       depends on LEON2 || LEON3 || LEON4 || LEON3FT
+       default y
+
+config DEV_UART_1
+       bool "Reserve UART1"
+       default "y"
+       depends on DEV_UART
+
+
+config DEV_UART_2
+       bool "Reserve UART2"
+       default "y"
+       depends on DEV_UART
+
+config EARLY_OUTPUT
+       bool "Enable early output"
+       depends on (DEV_UART&&(LEON2||LEON3||LEON4||LEON3FT))
+       default n
+
+config EARLY_CPU_MHZ
+       int "CPU frequency (MHz)"
+       depends on EARLY_OUTPUT&&(LEON2||LEON3||LEON4||LEON3FT)
+       default 45
+
+config EARLY_UART_BAUDRATE
+       int "Early UART baudrate"
+       depends on EARLY_OUTPUT&&(LEON2||LEON3||LEON4||LEON3FT)
+       default 115200
+
+choice
+        prompt "Select early UART port"
+        default EARLY_UART1
+        depends on EARLY_OUTPUT&&(LEON2||LEON3||LEON4||LEON3FT)
+
+config EARLY_UART1
+       bool "UART1"
+
+config EARLY_UART2
+       bool "UART2"
+
+endchoice
+
+config DEV_UART_FLOWCONTROL
+       bool "Enable UART flow control"
+       depends on DEV_UART
+       default y
+
+config DEV_NO_UARTS
+       int
+       default "2"
+       depends on DEV_UART
+
+config UART_THROUGH_DSU
+       bool "DSU samples UART port"
+       depends on (LEON2||LEON3||LEON4||LEON3FT) && !TSIM
+
+config DEV_MEMBLOCK
+       tristate "Enable memory block driver"
+       default y
+
+config DEV_FPGA_ITARFREE
+       def_bool y
+       depends on CPU_ITAR_FREE
+#       depends on SPW_RTC || CPU_ITAR_FREE
+
+config GR712_WATCHDOG
+       bool "GR712 Watchdog Driver"
+       depends on GR_712_RC
+       help
+         Includes the GR712 Watchdog driver.
+       
+menuconfig DEV_MIL_STD
+           bool "Enable MIL-STD-1553 as MAF Synchronization"
+           default n
+           help
+             Enable MAF synchronization with 1553 on IRQ 14. Use the SUBAD interrupt (#10) in the core1553BRM.
+           depends on GR_712_RC && PLAN_EXTSYNC
+
+if DEV_MIL_STD
+config MIL_RT_ADDR
+       int "Remote Terminal Address"
+       default 20
+       help
+         RT address for the core.
+       depends on GR_712_RC && PLAN_EXTSYNC
+
+config MIL_DESC_MEM_ADDR
+       hex "Descriptor Memory Address"
+       default "0x40700000"
+       help
+         Each 1553B RT has a reserved location in memory for storing information on how to process various subaddresses and mode codes. The memory space is referred to as the Descriptor Table. This descriptor memory address contains the address that points to the top of this reserved memory space. The memory size should be at least 128KB.
+       depends on GR_712_RC && PLAN_EXTSYNC
+
+config MIL_STD_1553_ODD_PARITY
+       bool "Enable odd parity"
+       default y
+       help
+         Enable odd parity
+       depends on GR_712_RC && PLAN_EXTSYNC
+
+choice
+     prompt "Select clock source"
+     default MIL_STD_1553_INTERNAL_CLOCK
+
+config MIL_STD_1553_INTERNAL_CLOCK
+       bool "Internal clock (24Mhz)"
+       help
+         Select Internal GR712 clock as clock source. It is 24 Mhz.
+       depends on GR_712_RC && PLAN_EXTSYNC
+
+config MIL_STD_1553_CLKFREQ_12
+       bool "External clock 12Mhz"
+       help
+         Use an external clock at 12Mhz.
+       depends on GR_712_RC && PLAN_EXTSYNC
+
+config MIL_STD_1553_CLKFREQ_16
+       bool "External clock 16Mhz"
+       help
+         Use an external clock at 16Mhz.
+       depends on GR_712_RC && PLAN_EXTSYNC
+
+config MIL_STD_1553_CLKFREQ_20
+       bool "External clock 20Mhz"
+       help
+         Use an external clock at 20Mhz.
+       depends on GR_712_RC && PLAN_EXTSYNC
+
+config MIL_STD_1553_CLKFREQ_24
+       bool "External clock 24Mhz"
+       help
+         Use an external clock at 24Mhz.
+       depends on GR_712_RC && PLAN_EXTSYNC
+
+endchoice
+
+endif
+
+menuconfig LICE
+	   bool "Enable LICE support"
+	   default n
+           depends on SPW_RTC || CPU_ITAR_FREE || GR_712_RC
+if LICE
+config DEV_LICE_INTERFACE
+       bool "Trace internal XM events on LICE"
+       default "y"
+       depends on SPW_RTC || CPU_ITAR_FREE || GR_712_RC
+
+config DEV_LICE_SCHEDULING
+       bool "Trace scheduling XM events on LICE"
+       default "y"
+       depends on SPW_RTC || CPU_ITAR_FREE || GR_712_RC
+
+config LICE_ADDRESS
+       hex "LICE memory address"
+       default "0x2C009000"
+       depends on SPW_RTC || CPU_ITAR_FREE || GR_712_RC
+endif
+
+endmenu
+

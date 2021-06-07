@@ -1,0 +1,105 @@
+# Changelog:
+# - [24/11/2015:SPR-241115-02] Added JMP_USR_FUNC_COLD_RESET_SYSTEM option
+# - [20/11/2015:SPR-110915-01] IPVI_SUPPORT added. 
+#      MAX_NO_IPVI depends on whether IPVI_SUPPORT is set or not.
+# - [09/12/2016:CP-161202-01] MAX_CUSTOM_FILES added.
+
+config EXPERIMENTAL
+       bool "Enable experimental features"
+       default n
+
+config ASSERT
+       bool "Enable assertions"
+       default y
+
+menuconfig DEBUG
+	   bool "Debug and profiling support"
+	   default y
+	   
+if DEBUG
+config VERBOSE_TRAP
+       bool "Dump CPU state when a trap is raised"
+       default y
+endif
+
+config NO_GCC_OPT
+       bool
+       default n
+
+config ID_STRING_LENGTH
+       int "Max. identifier length (B)"
+       default "16"
+       
+config MAX_NO_CUSTOMFILES
+       int "Max. number of custom files"
+       default "3"
+
+menu "Hypervisor"
+
+config VOLUNTARY_PREEMPTION
+       bool "Enable voluntary preemption support"
+       default "n"
+       depends on EXPERIMENTAL
+
+config KSTACK_KB
+       int "Kernel stack size (KB)"
+       default "8"
+
+config NO_VCPUS
+       int "Number of virtual CPUs"
+       default "2"
+
+if MULTICORE_SUPPORT
+
+config IPVI_SUPPORT
+       bool
+       default "y"
+endif
+
+if !MULTICORE_SUPPORT
+config IPVI_SUPPORT
+       bool 'IPVI support'
+       default "n"
+endif
+
+config MAX_NO_IPVI
+       int "Number of IPVIs"
+       default "4"
+       depends on IPVI_SUPPORT
+
+config MAX_NO_MAREAS
+       int
+       default "8"
+
+config PLAN_EXTSYNC
+       bool "Enable external synchronisation"
+       default "n"
+
+config AUDIT_EVENTS     
+       bool "Enable kernel audit events"
+       default "n"
+
+config CORE_COMPRESSION
+       bool "Compress kernel image"
+       default "n"
+
+config JMP_USR_FUNC_COLD_RESET_SYSTEM
+       bool "Jump to user function on cold reset system"
+       default "n"
+
+endmenu
+
+source "Kconfig.ver"
+
+if MMU
+source "kernel/mmu/Kconfig"
+endif
+
+if MPU
+source "kernel/mpu/Kconfig"
+endif
+
+source "klibc/Kconfig"
+
+source "drivers/Kconfig"
+source "objects/Kconfig"

@@ -1,0 +1,19 @@
+# Example : hello-world
+
+# Description
+This example shows how to build a basic application with XtratuM.
+
+# Partition definition
+There is one partition that will print a 'Hello World!' message
+
+# Configuration table
+Basic configuration.
+
+A scheduling plan is defined under the following premises:
+
+MAF = 200 msec 		
+P0: S   0 ms  D 200 ms
+
+# Expected results
+\xm{} will load, initialise and run in user mode the partition. 
+During the execution, the partition will print a 'Hello World!' message and halt.

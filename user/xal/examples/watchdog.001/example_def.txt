@@ -1,0 +1,39 @@
+# Example : watchdog.001
+
+# Description
+This example shows how to handle the XtratuM watchdog together the use of the 
+two types of timers provided by XtratuM
+
+# Partition definition
+There are two partitions.
+P0 will program the timer based on the Hardware clock. Reload the watchdog with 1000msec.
+P1 will program the timer based on the Execution clock.
+
+# Configuration table
+Basic configuration. Partitions are defined to be executed at different memory addresses.
+
+A scheduling plan is defined under the following premises:
+
+MAF = 1000 msec 		
+P0: S   0 ms  D 500 ms
+P1: S 500 ms  D 500 ms
+
+The watchdog initial value is set to 500ms.
+The hardware watchdog is configured to reload a 1000ms.
+
+# Expected results
+\xm{} will load, initialise and run in user mode the partitions. 
+During the execution, P0 will install a handler for the timer IRQ
+and will set the HW timer based on HW_CLOCK at a period of 1 second.
+The timer handler also reload the watchdog with a budget of 1 second. 
+The partition 1 expects that handler is called 10 times (10 seconds),
+during this time the watchdog is reloaded. Then the partition is halted.
+
+P1 will install a handler for the timer irq and will set the EXEC timer
+based on EXEC clock at a period of 1 second. When the timer handler is 
+called 10 times the partition is halted. As the watchdog is not reloaded
+after the partition 0 halts, the execution will not finished if a 
+hardware watchdog is configured.
+
+
+

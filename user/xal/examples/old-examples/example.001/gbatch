@@ -1,0 +1,5 @@
+reset
+load resident_sw
+run
+quit
+65

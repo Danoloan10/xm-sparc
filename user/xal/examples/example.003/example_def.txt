@@ -1,0 +1,33 @@
+# Example : example.003
+
+# Description
+This example shows how to generate traces and how to manage them
+
+# Partition definition
+There are three partitions.
+P0 and P1 will generate traces with 3 bytes of payload. P0 payload will increase in one unit each time. P1 payload will increase in power of two each time.
+P2 is a system partition that will read the traces of P0 and P1, after checking the status of each one.
+
+# Configuration table
+P0 and P1 are user partitions and P2 is system partition.
+Basic configuration.
+
+A scheduling plan is defined under the following premises:
+
+MAF = 1500 msec
+P0: S    0 ms  D 500 ms
+P1: S  500 ms  D 500 ms
+P2: S 1000 ms  D 500 ms
+
+# Expected results
+\xm{} will load, initialise and run in user mode partitions P0 and P1, and in 
+system mode partition P2. During the execution, P2 will be continuously printing
+the state of the traces of P0 and P1.
+P0 and P1 will generate 6 traces with 3 bytes of payload each one. P0 payload 
+will increase in one unit each time (0, 1, 2, 3, 4, 5...). P1 payload will 
+increase in power of two each time (0, 1, 2, 4, 8, 16...). Afeter that, both 
+partitions will halt themselves.
+If P2 finds that there is one or more events in the traces of P0 or P1, it will
+print the information of the event and its associated payload. P2 will finish 
+when it detects during 3 consecutive slots that there is no new events in any 
+of the traces.

@@ -1,0 +1,250 @@
+# Changelog:
+# - [17/11/2015:SPR-221015-01] LEON_EDAC_SUPPORT added
+
+mainmenu "XM Configuration"
+
+config SPARCv8
+       def_bool y
+
+config HWIRQ_PRIO_LBS
+       def_bool y
+
+config ARCH_MMU_BYPASS
+	def_bool y
+
+#config HWIRQ_PRIO_FBS
+#       def_bool y
+
+config CPU_NO_IRQS
+       int
+       default "16" if (LEON3||LEON2||LEON3FT)
+
+config TARGET_BIG_ENDIAN
+       def_bool y       
+
+#config NO_CPUS
+#       int
+#       default "1"
+
+menu "Processor"
+
+choice
+     prompt "SPARC cpu"
+     default LEON3
+
+config LEON2
+       bool "Leon2"
+       --help---
+	Select this for a LEON2 processor.
+
+config LEON3
+       bool "Leon3"
+       --help---
+	Select this for a LEON3 processor.
+
+config LEON3FT
+       bool "Leon3FT"
+	   --help---
+	Select this for a LEON3FT processor.
+
+config LEON4
+       bool "Leon4"
+       --help---
+	Select this for a LEON4 processor.
+
+endchoice
+
+choice
+     prompt "Board"
+     default TSIM if LEON3 || LEON3FT
+     default GR_CPCI_XC4VLX200 if LEON4
+
+config TSIM
+       bool "TSim"
+       depends on LEON2 || LEON3 || LEON3FT
+
+config GR_CPCI_XC4V
+       bool "GR-CPCI-XC4V"
+       depends on LEON3
+
+config GR_PCI_XC2V
+       bool "GR-PCI-XC2V"
+       depends on LEON2
+
+config GR_712_RC
+       bool "GR712RC"
+       depends on LEON3FT
+
+config CPU_ITAR_FREE
+       bool "CPU-ITAR-FREE"
+       depends on LEON2
+
+config SPW_RTC
+       bool "SpW-RTC"
+       depends on LEON2
+
+config SIMLEON
+       bool "SIMLEON"
+       depends on LEON2
+
+config GR_CPCI_XC4VLX200
+       bool "GR-CPCI-XC4VLX200"
+       depends on LEON4
+
+endchoice
+
+choice
+     prompt "Multicore support"
+     default NONE
+
+config NONE
+       bool "None"
+       --help---
+       Select this to disable multicore support.
+
+config AMP_SUPPORT
+       bool "AMP support"
+       --help---
+	Select this to enable AMP support.
+
+config SMP_SUPPORT
+       bool "SMP support"
+       --help---
+	Select this to enable SMP support.
+endchoice
+
+config NO_CPUS
+       int "Number of CPUs supported"
+       default "4" if (GR_CPCI_XC4VLX200)
+       default "2" if (GR_712_RC)
+       default "1" if (!GR_712_RC)
+       depends on SMP_SUPPORT
+
+config MULTICORE_SUPPORT
+       bool
+       default "n" if (!AMP_SUPPORT&&!SMP_SUPPORT)
+       default "y" if (AMP_SUPPORT||SMP_SUPPORT)
+
+config NO_HWIRQS
+       int
+       default "16" if (TSIM||GR_CPCI_XC4V||GR_PCI_XC2V||GR_712_RC||SIMLEON)
+       default "31" if (CPU_ITAR_FREE)
+       default "32" if (SPW_RTC||LEON4)
+
+config CPU_ITAR_FREE_SIM
+       def_bool y
+       depends on SIMLEON
+
+config AT697F
+       def_bool y
+       depends on CPU_ITAR_FREE || SPW_RTC
+
+config AT697E
+       def_bool y
+       depends on GR_PCI_XC2V || SIMLEON
+
+choice
+     prompt "SPARC memory protection schema"
+     default MMU
+
+config MPU
+       bool "MPU (Write Protection Registers)"
+       depends on LEON2
+
+config WA_PROTECT_MMAP_PREG_WPOINT
+       def_bool y
+       depends on MPU
+
+config MMU
+       bool "MMU"
+       depends on !GR_CPCI_AT697E
+
+endchoice
+
+config WATCHDOG
+       bool "Enable watchdog"
+       default n
+       depends on SPW_RTC
+
+config WATCHDOG_NMAF
+       int "Reset watchdog every N MAFs"
+       default 1
+       depends on WATCHDOG
+
+config WATCHDOG_TIMEOUT
+       int "Watchdog timeout"
+       default 5000000
+       depends on WATCHDOG        
+
+config UART_TIMEOUT
+       int
+       default 500 if !UART_THROUGH_DSU
+       default 120000 if UART_THROUGH_DSU
+
+config LEON_EDAC_SUPPORT
+       bool "EDAC support"
+       default y
+       depends on GR_712_RC
+
+config ENABLE_CACHE
+       bool "Enable cache"
+       default y
+
+config CACHE_SNOOP
+       bool "Enable cache snoop"
+       depends on ENABLE_CACHE
+       default y
+
+config CACHE_IBURST_FETCH
+       bool "Enable instruction burst fetch"
+       depends on ENABLE_CACHE
+       default y
+
+config FLUSH_CACHE_AFTER_CS
+       bool "Flush cache after context switch"
+       depends on ENABLE_CACHE
+       default y
+choice
+        prompt "Select L2 cache write policy"
+        default COPY_BACK
+        depends on ENABLE_CACHE&&LEON4
+
+config COPY_BACK
+       bool "Copy-back"
+
+config WRITE_THROUGH
+       bool "Write-through"
+
+endchoice
+
+config ENABLE_POWERDOWN
+       bool "Enable Power-Down"
+       default y
+       depends on LEON3 || LEON4 || LEON3FT
+
+config WA_PROTECT_MMAP_PREG_WPOINT
+       def_bool y
+       depends on GR_CPCI_AT697E
+
+endmenu
+
+menu "Physical memory layout"
+config XM_LOAD_ADDR
+       hex "XM load address"
+       default "0x0" if LEON4
+       default "0x40000000" if (LEON2||LEON3||LEON3FT)
+
+config XM_OFFSET
+       hex "XM virtual address"
+!       default XM_LOAD_ADDR if !MMU
+       depends on MMU
+       default "0xFC000000" if MMU
+
+endmenu
+
+config XM_OFFSET
+       default XM_LOAD_ADDR if !MMU
+       depends on MPU
+
+
+source "kernel/Kconfig"

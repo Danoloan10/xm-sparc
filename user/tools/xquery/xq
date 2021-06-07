@@ -1,0 +1,33 @@
+#!/bin/bash
+# xquery update from command-line
+# http://xqilla.sourceforge.net/XQueryUpdate
+# http://www.xmlmind.com/_tutorials/XQueryUpdate/index.html
+
+docflag=false	# document errors
+while getopts 'd' c
+do
+	case $c in
+	d)	docflag=true;;
+	?)	usage;;
+	esac
+done
+shift $(($OPTIND - 1))
+
+script=`mktemp script.XXX`
+error=`mktemp error.XXX`
+cat > $script <<EOF
+$*
+EOF
+
+echo xq: $*
+xqilla -u -f -e $script 2>$error
+cat $error
+
+# xpath error description
+if $docflag; then
+	err=`sed -n 's|.*\[err:\(.*\)\].*|\1|p' $error`
+	! test -e /tmp/xpath20 && wget -O /tmp/xpath20 http://www.w3.org/TR/xpath20
+	grep -A5 "id=\"ERR$err\"" /tmp/xpath20
+fi
+
+rm $error $script

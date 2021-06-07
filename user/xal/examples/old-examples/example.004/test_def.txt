@@ -1,0 +1,57 @@
+
+/* Begin_test
+
+# Name
+Test_18.1
+
+# Description
+
+Test the ability to use some specific hypercalls by a supervisor partition and to control the execution of other partitions. 
+
+# Validated requirements
+
+# Partition definition
+This test uses 4 partitions. P3 and P4 (same code partition3.c). 
+P1 and P2 use the same code to test the hypercalls and control the execution of P3 and P4 respectively. 
+P1 will control the execution of P3. P2 will control the execution of P4. 
+
+P1 and P2 will call the following hypercalls: 
+ XM_hm_open, 
+ XM_trace_open,
+ XM_suspend_partition,
+ XM_get_partition_status,
+ XM_resume_partition,
+ XM_halt_partition,
+ XM_halt_system, 
+
+which only can be used by supervisor partitions. 
+
+P3 and P4 print a counter and wait for the next slot. 
+
+
+# Configuration table
+Basic configuration.
+P1 is supervisor. 
+P2, P3 and P4 are no supervisor. 
+
+MAF = 2000 msec		\\
+P3: S    0 ms  D 50 ms \\
+P4: S   50 ms  D 50 ms \\
+P2: S  500 ms  D 500 ms \\
+P1: S 1000 ms  D 500 ms \\
+
+# Expected results
+P1 success in all hypercalls.(return value >= 0)
+P2 fails in all hypercall return value < 0)
+P3 is suspended, resumed, halted by P1.
+P4 is never suspended, resumed, halted by P4
+
+
+End_test */ 
+
+
+/* Code */
+
+/* @ */
+codigo del programa
+/* @ */

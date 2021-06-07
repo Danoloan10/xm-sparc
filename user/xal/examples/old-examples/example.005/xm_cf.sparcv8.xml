@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<SystemDescription xmlns="http://www.xtratum.org/xm-3.x" version="1.0.0" name="INTER-1">
+  <HwDescription>
+    <MemoryLayout>
+      <Region type="rom" start="0x0" size="4MB"/>
+      <Region type="stram" start="0x40000000" size="4MB"/>
+<!--        <Region type="sdram" start="0x60000000" size="4MB"/> -->
+    </MemoryLayout>
+    <ProcessorTable>
+      <Processor id="0" frequency="50Mhz">
+<CyclicPlanTable>
+  <Plan id="0" majorFrame="1s">
+    <Slot id="0" start="0ms" duration= "100ms" partitionId="1"/>
+    <Slot id="1" start="100ms" duration= "100ms" partitionId="2"/>
+    <Slot id="2" start="200ms" duration= "100ms" partitionId="3"/>
+    <Slot id="3" start="300ms" duration= "100ms" partitionId="4"/>
+    <Slot id="4" start="400ms" duration= "100ms" partitionId="5"/>
+    <Slot id="5" start="500ms" duration= "100ms" partitionId="6"/>
+    <Slot id="6" start="600ms" duration= "400ms" partitionId="0"/>
+  </Plan>
+  <Plan id="1" majorFrame="2s">
+    <Slot id="0" start="0ms" duration= "1s" partitionId="1"/>
+    <Slot id="1" start="1000ms" duration= "500ms" partitionId="2"/>
+    <Slot id="2" start="1500ms" duration= "100ms" partitionId="3"/>
+    <Slot id="3" start="1600ms" duration= "50ms" partitionId="4"/>
+    <Slot id="4" start="1650ms" duration= "10ms" partitionId="5"/>
+    <Slot id="5" start="1660ms" duration= "5ms" partitionId="6"/>
+    <Slot id="6" start="1670ms" duration= "300ms" partitionId="0"/>
+  </Plan>
+</CyclicPlanTable>
+      </Processor>
+    </ProcessorTable>
+    <Devices>
+      <Uart id="0" baudRate="115200" name="Uart"/>
+    </Devices>
+  </HwDescription>
+  <XMHypervisor console="Uart">
+    <PhysicalMemoryArea size="1MB"/>
+  </XMHypervisor>
+  <PartitionTable>
+    <Partition id="0" name="Partition0" console="Uart" flags="system">
+      <PhysicalMemoryAreas>
+        <Area start="0x40100000" size="128KB"/>
+      </PhysicalMemoryAreas>
+      <PortTable>
+        <Port name="port1" type="sampling" direction="destination"/>
+        <Port name="port2" type="sampling" direction="destination"/>
+        <Port name="port3" type="sampling" direction="destination"/>
+        <Port name="port4" type="sampling" direction="destination"/>
+        <Port name="port5" type="sampling" direction="destination"/>
+        <Port name="port6" type="sampling" direction="destination"/>
+      </PortTable>
+    </Partition>
+    <Partition id="1" name="Partition1" console="Uart" flags="">
+      <PhysicalMemoryAreas>
+        <Area start="0x40120000" size="128KB"/>
+      </PhysicalMemoryAreas>
+      <PortTable>
+        <Port name="port1" type="sampling" direction="source"/>
+      </PortTable>
+    </Partition>
+    <Partition id="2" name="Partition2" console="Uart" flags="">
+      <PhysicalMemoryAreas>
+        <Area start="0x40140000" size="128KB"/>
+      </PhysicalMemoryAreas>
+      <PortTable>
+        <Port name="port1" type="sampling" direction="source"/>
+      </PortTable>
+    </Partition>
+    <Partition id="3" name="Partition3" console="Uart" flags="">
+      <PhysicalMemoryAreas>
+        <Area start="0x40160000" size="128KB"/>
+      </PhysicalMemoryAreas>
+      <PortTable>
+        <Port name="port1" type="sampling" direction="source"/>
+      </PortTable>
+     </Partition>
+    <Partition id="4" name="Partition4" console="Uart" flags="">
+      <PhysicalMemoryAreas>
+        <Area start="0x40180000" size="128KB"/>
+      </PhysicalMemoryAreas>
+      <PortTable>
+        <Port name="port1" type="sampling" direction="source"/>
+      </PortTable>
+    </Partition>
+    <Partition id="5" name="Partition5" console="Uart" flags="">
+      <PhysicalMemoryAreas>
+        <Area start="0x401A0000" size="128KB"/>
+      </PhysicalMemoryAreas>
+      <PortTable>
+        <Port name="port1" type="sampling" direction="source"/>
+      </PortTable>
+    </Partition>
+    <Partition id="6" name="Partition6" console="Uart" flags="">
+      <PhysicalMemoryAreas>
+        <Area start="0x401c0000" size="128KB"/>
+      </PhysicalMemoryAreas>
+      <PortTable>
+        <Port name="port1" type="sampling" direction="source"/>
+      </PortTable>
+    </Partition>
+  </PartitionTable>
+
+  <Channels>
+    <SamplingChannel maxMessageLength="64B" refreshPeriod="10s">
+      <Source partitionId="1" portName="port1"/>
+      <Destination partitionId="0" portName="port1"/>
+    </SamplingChannel>
+    <SamplingChannel maxMessageLength="64B" refreshPeriod="10s">
+      <Source partitionId="2" portName="port1"/>
+      <Destination partitionId="0" portName="port2"/>
+    </SamplingChannel>
+    <SamplingChannel maxMessageLength="64B" refreshPeriod="10s">
+      <Source partitionId="3" portName="port1"/>
+      <Destination partitionId="0" portName="port3"/>
+    </SamplingChannel>
+    <SamplingChannel maxMessageLength="64B" refreshPeriod="10s">
+      <Source partitionId="4" portName="port1"/>
+      <Destination partitionId="0" portName="port4"/>
+    </SamplingChannel>
+    <SamplingChannel maxMessageLength="64B" refreshPeriod="10s">
+      <Source partitionId="5" portName="port1"/>
+      <Destination partitionId="0" portName="port5"/>
+    </SamplingChannel>
+    <SamplingChannel maxMessageLength="64B" refreshPeriod="10s">
+      <Source partitionId="6" portName="port1"/>
+      <Destination partitionId="0" portName="port6"/>
+    </SamplingChannel>
+  </Channels>
+</SystemDescription>

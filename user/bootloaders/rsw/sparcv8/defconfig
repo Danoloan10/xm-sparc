@@ -1,0 +1,15 @@
+#
+# Automatically generated make config: don't edit
+# XM version: 2.3.0
+# Wed Jul  8 20:01:43 2009
+#
+CONFIG_STACK_SIZE=8
+CONFIG_ARCH="sparcv8"
+CONFIG_KERNELVERSION="1.0.0"
+
+#
+# RSW memory layout
+#
+CONFIG_RDONLY_SEC_ADDR=0x40200000
+CONFIG_RW_SEC_ADDR=0x40090000
+CONFIG_OUTPUT_ENABLED=y

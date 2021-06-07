@@ -1,0 +1,37 @@
+# Name Example 002
+
+# Description
+
+This example shows the ability to virtualise some system resources.
+The virtualised resources are: serial port and timers (hardware and execution timers).
+
+# Validated requirements
+
+# Partition definition
+The test defines 4 partitions: P1, P2, P3 and P4. 
+P1 and P2 programs two periodic timers (hardware and execution) and enable and unmask 
+the associated interrupts.
+When the interrupt arrives to the partition, the timer interrupt handler stores the clock values.
+When a number of hw interrupts is achieved, P1 and P2 print the clock values and the differences with respect to the previous.
+The periods of the timers are: 330msec (hardware clock) and 220msec (execution clock).
+Each time a new slot starts, the hw timers are sets with respect to the slot start.
+
+P3 and P4 are simple counting partitions.
+
+Termination: Each partition finishes when a counter value is reached.
+
+# Configuration table
+Basic configuration.
+P1 is defined as supervisor. P2, P3 and P4 are not supervisor.
+
+MAF = 3 sec  \\
+P1: S    0 s  D 1 sec  \\
+P3: S    1 s  D 100 msec  \\
+P2: S 1200 ms D 1 sec  \\
+P4: S 2200 ms  D 150 msec  \\
+
+# Expected results
+P1 and P2 will print the ocurrence of the interrupts each 330msec and 220msec when P1 and P2 are scheduled.
+The execution timer get always differences of 220msec. The hardware timer get differences of 330msec and one
+of 2000msec, this last is due to the scheduling of the partitions.
+

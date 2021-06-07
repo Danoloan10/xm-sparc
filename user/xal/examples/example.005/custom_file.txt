@@ -1,0 +1,7 @@
+I'm the custom file!
+Following you will find an example text...
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce a turpis ipsum, sit amet fermentum ante.
+Suspendisse rutrum urna at sapien sagittis porttitor.
+Sed dignissim fermentum neque vulputate sodales.
+Donec eget arcu id felis eleifend consequat tincidunt ac dui. Quisque a felis elementum lacus rutrum gravida. Quisque faucibus tristique fermentum. Integer ut lectus vel mi aliquet sollicitudin non eu erat. Proin non ligula non nisi consequat iaculis. Praesent tempus risus sed turpis ornare sit amet blandit urna lacinia. Mauris id arcu convallis urna ultricies cursus a id sapien. In nunc libero, facilisis nec feugiat nec, viverra ut nunc. Proin eget leo sit amet dolor pulvinar porta. Proin sit amet elit et tellus bibendum dictum non id arcu.

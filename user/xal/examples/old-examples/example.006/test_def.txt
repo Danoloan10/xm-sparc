@@ -1,0 +1,43 @@
+/* Begin_test 
+# Name
+Test_15.4
+# Description
+
+This test validates the ability to log and access to the logged events in the Health Monitoring. 
+
+# Validated requirements
+
+# Partition definition
+Same definition than 15.3. Additionally, a partition P3 is defined.
+P3 opens and reads the HM logged events. Each P3 slot, print the log status
+and the logs.
+When P1 is halted, P3 halts.
+
+# Configuration table
+Basic Configuration.
+Partitions P1 and P2 have enabled the use of the FPU in the CT. 
+P1 defines the action SHUTDOWN associated to the HM event ocurrence XM_HM_EV_DIVIDE_EXCEPTION.
+P2 P1 defines the action HALT associated to the HM event ocurrence XM_HM_EV_DIVIDE_EXCEPTION.
+P1 and P2 log the HM events.
+P3 is a supervisor partition.
+
+P3 slot in the plan has a duration of 2 seconds to have time to print all messages.
+
+# Expected results
+P1 and P2 produce the same results than 15.3
+P3 prints the HM log status and logs.
+
+# Validation criteria
+
+
+# Comments
+
+End_test */
+
+
+
+/* Code */
+
+/* @ */
+codigo del programa
+/* @ */

@@ -1,0 +1,34 @@
+EXAMPLE 002
+
+# Description
+This example shows the use of sampling ports. 
+
+
+# Partition definition
+The scenario consists in three partitions P1, P2 and P3.
+P1 writes in port1 a random value. P2 and P3 read from port1 the value and compute some new value
+writting, respectively,  in port2 and port3 the computed value.
+P1 reads from port2 and prot3 and print the values.
+
+
+# Configuration table
+
+P1 ==channel==> P2  (port1)
+P1 ==channel==> P2  (port1)
+P2 ==channel==> P1  (port2)
+P3 ==channel==> P1  (port3)
+
+Sched plan;
+P1 100 ms => writes the value in port1
+P2 100 ms => reads from p1 ; computes; writes port2
+P3 100 ms => reads from p1 ; computes; writes port3
+P1 100 ms => reads from p2 and p3; print the values
+
+
+# Expected results
+1st MAF: open sampling ports;
+Next MAFs:
+- P1 generate a random value (sensor simulation) and writes in port1
+- P2 reads from p1 ; computes; writes port2
+- P3 reads from p1 ; computes; writes port3
+- P1 reads from p2 and p3; print the values

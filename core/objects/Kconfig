@@ -1,0 +1,23 @@
+menu "Objects"
+
+config OBJ_HM_VERBOSE
+       bool "Verbose HM events"
+       default y
+
+config OBJ_STATUS_ACC
+       bool "Enable XM/partition status accounting"
+       default n
+
+config OBJ_TRACE_LOG_NO_ELEM
+       int "Size of the XM's internal buffer to store trace logs"
+       default "20"
+
+config OBJ_HM_LOG_NO_ELEM
+       int "Size of the XM's internal buffer to store hm logs"
+       default "20"
+
+config OBJ_MAX_NO_COMMPORTS
+       int "Maximum number of communication ports"
+       default "256"
+
+endmenu

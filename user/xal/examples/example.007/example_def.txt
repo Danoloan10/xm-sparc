@@ -1,0 +1,36 @@
+# Example : example.007
+
+# Description
+
+Test the ability to use some specific hypercalls by a system partition and to control the execution of other partitions.
+
+# Partition definition
+This test uses 3 partitions. P1 and P2 (same code partition.c).
+P0 will control the execution of P1 and P2.
+
+P0 will call the following hypercalls:
+ - XM_suspend_partition
+ - XM_get_partition_status
+ - XM_resume_partition
+ - XM_halt_partition
+ - XM_reset_partition
+ - XM_halt_system
+
+which only can be used by system partitions.
+P1 and P2 print a counter and wait for the next slot.
+
+# Configuration table
+Basic configuration.
+P0 is system partition.
+P1 and P2 are user partitions.
+
+MAF = 2500 msec
+P0: S    0 ms  D 500 ms
+P1: S  500 ms  D 500 ms
+P2: S 1000 ms  D 500 ms
+P1: S 1500 ms  D 500 ms
+P2: S 2000 ms  D 500 ms
+
+# Expected results
+\xm{} will load, initialise and run in user mode partitions P1 and P2, and in system mode partition P0.
+During the execution, P0 will use the instructions reserved for system partitions to suspend, resume, halt and reset the execution of P1 and P2.

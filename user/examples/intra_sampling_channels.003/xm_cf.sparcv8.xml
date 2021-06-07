@@ -1,0 +1,93 @@
+<SystemDescription xmlns="http://www.xtratum.org/xm-3.x"
+		   version="1.0.0" name="intra_sampling_channels.003">
+  <HwDescription>
+    <MemoryLayout>
+        <Region type="stram" start="0x40000000" size="20MB"/>
+      </MemoryLayout>
+    <ProcessorTable>
+      <Processor id="0" frequency="80Mhz">
+	  <CyclicPlanTable>
+	    <Plan id="0" majorFrame="4000ms">
+	      <Slot id="0" start="0ms" duration="1000ms" partitionId="0"/>
+              <Slot id="1" start="1000ms" duration="1000ms" partitionId="1"/>
+	      <Slot id="2" start="2000ms" duration="1000ms" partitionId="2"/>
+              <Slot id="3" start="3000ms" duration="1000ms" partitionId="3"/>
+	    </Plan>
+	  </CyclicPlanTable>
+      </Processor>
+    </ProcessorTable>
+     <Devices>
+	 <Uart id="0" baudRate="115200" name="Uart" /> 
+       </Devices>          
+    </HwDescription>
+
+  <XMHypervisor console="Uart" >
+    <PhysicalMemoryArea size="256KB" />
+  </XMHypervisor>
+
+  <PartitionTable>
+    <Partition id="0" name="Partition0" flags="system boot" console="Uart">
+      <PhysicalMemoryAreas>
+	<Area start="0x40040000" size="256KB"/>
+      </PhysicalMemoryAreas>
+      <TemporalRequirements duration="500ms" period="500ms"/>
+      <PortTable>
+        <Port name="port0" type="sampling" direction="source"/>
+        <Port name="port1" type="sampling" direction="source"/>
+        <Port name="port2" type="sampling" direction="source"/>
+      </PortTable>
+    </Partition>
+    <Partition id="1" name="Partition1" flags="system boot" console="Uart">
+      <PhysicalMemoryAreas>
+	<Area start="0x40080000" size="256KB"/>
+      </PhysicalMemoryAreas>
+      <TemporalRequirements duration="500ms" period="500ms"/>
+      <PortTable>
+        <Port name="port0" type="sampling" direction="destination"/>
+        <Port name="port1" type="sampling" direction="destination"/>
+      </PortTable>
+    </Partition>
+    <Partition id="2" name="Partition2" flags="system boot" console="Uart">
+      <PhysicalMemoryAreas>
+        <Area start="0x400c0000" size="256KB"/>
+      </PhysicalMemoryAreas>
+      <TemporalRequirements duration="500ms" period="500ms"/>
+      <PortTable>
+        <Port name="port0" type="sampling" direction="destination"/>
+        <Port name="port3" type="sampling" direction="source"/>
+      </PortTable>
+    </Partition>
+    <Partition id="3" name="Partition3" flags="system boot" console="Uart">
+      <PhysicalMemoryAreas>
+        <Area start="0x40100000" size="256KB"/>
+      </PhysicalMemoryAreas>
+      <TemporalRequirements duration="500ms" period="500ms"/>
+      <PortTable>
+        <Port name="port2" type="sampling" direction="destination"/>
+        <Port name="port3" type="sampling" direction="destination"/>
+      </PortTable>
+    </Partition>
+
+  </PartitionTable>
+
+   <Channels>
+    <SamplingChannel maxMessageLength="64B">
+      <Source portName="port0" partitionId="0" />
+      <Destination portName="port0" partitionId="1" />
+      <Destination portName="port0" partitionId="2" />
+    </SamplingChannel>
+    <SamplingChannel maxMessageLength="64B">
+      <Source portName="port1" partitionId="0" />
+      <Destination portName="port1" partitionId="1" />
+    </SamplingChannel>
+    <SamplingChannel maxMessageLength="64B">
+      <Source portName="port2" partitionId="0" />
+      <Destination portName="port2" partitionId="3" />
+    </SamplingChannel>
+    <SamplingChannel maxMessageLength="64B">
+      <Source portName="port3" partitionId="2" />
+      <Destination portName="port3" partitionId="3" />
+    </SamplingChannel>
+   </Channels>
+
+</SystemDescription>

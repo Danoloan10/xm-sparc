@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+
+my $filein = $ARGV[0];
+my %visited;
+$ntest = "101";
+# print "file in: $filein\n";
+
+$test_file = "test_" . $ntest . ".res";
+
+$cmd = "make clean; rm -f $test_file";
+print  "$cmd\n";
+system($cmd);
+$cmd = "make";
+print  "$cmd\n";
+@rcomp = `$cmd`;
+#compiled
+open (rsw, "resident_sw") or die("The compilation process has Failed\n");
+close (rsw);
+
+$cmd = "tsim-leon3 resident_sw -c tbatch > $test_file";
+print  "$cmd\n";
+system($cmd); 
+@result = `cat $test_file | grep OUT:`;
+
+
+$ok = 1;
+$out{P1} = $out{P2} = $out{P3} = 0;
+
+foreach $line (@result) {
+  ($kk, $part, $value) = split(":", $line);
+  chomp($value);
+#   print "$line";
+#   print ">>> $out{$part}\n";
+  if ($value > $out{$part}) {  #each time increment a value
+        $out{$part} = $value;
+    } else { 
+#         print "  $value ==> $out{$part}\n";
+        $ok = 0;
+   }
+
+}
+
+## Specific test validation: sequence of partitions has to be 0 1 2 0 1 2 ....
+## It is evaluated by means of the modulus of the number of partitions (3)
+
+if ($ok == 1) {
+    print STDERR "Test $ntest => Passed\n";
+} else {
+    print STDERR "Test $ntest => Not passed\n" 
+}

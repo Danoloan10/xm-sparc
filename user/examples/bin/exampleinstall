@@ -1,0 +1,195 @@
+#!/bin/bash
+
+EXAMPLES=\
+(
+	user/examples/README
+	user/examples/Makefile.all
+
+	user/examples/bin
+	user/examples/bin/xpath
+	user/examples/bin/xpathstart
+	
+	user/examples/common
+	user/examples/common/config.mk.dist
+	user/examples/common/rules.mk
+
+	user/examples/lib
+	user/examples/lib/loader.lds
+	user/examples/lib/libexamples.a
+
+	user/examples/include
+	user/examples/include/std_c.h
+	
+	user/examples/hello_world
+	user/examples/hello_world/*
+
+	`case "$ARCH" in 
+	sparcv8)
+cat <<EOF
+	user/examples/clocks
+	user/examples/clocks/*
+
+	user/examples/custom_files
+	user/examples/custom_files/*
+
+	user/examples/cswitch
+	user/examples/cswitch/*
+
+	user/examples/fp
+	user/examples/fp/*
+
+	user/examples/hm
+	user/examples/hm/*
+
+	user/examples/hwirq
+	user/examples/hwirq/*
+
+	user/examples/ioports
+	user/examples/ioports/*
+
+	user/examples/queuing_ports
+	user/examples/queuing_ports/*
+
+	user/examples/reset
+	user/examples/reset/*
+
+	user/examples/sampling_ports
+	user/examples/sampling_ports/*
+
+	user/examples/sched_events
+	user/examples/sched_events/*
+
+	user/examples/status
+	user/examples/status/*
+
+	user/examples/timers
+	user/examples/timers/*
+
+	user/examples/tracing
+	user/examples/tracing/*
+
+	user/examples/xm_memcpy
+	user/examples/xm_memcpy/*
+EOF
+	;;
+
+	ia32)
+cat <<EOF
+	user/examples/linux
+	user/examples/linux/*
+EOF
+	;;
+	esac`
+)
+
+progname=$(basename $0)
+function warn() { echo -e $* 1>&2; }
+function eprint() { warn $progname: $*; exit 1; }
+function usage(){ eprint "usage: $progname [-dc] -t <target_dir>"; }
+
+function install(){
+	if $drflag; then
+		for i in $*; do test -f "$i" && echo $i; done
+	else
+		$(which install) $* # -v
+	fi
+}
+
+# parse options
+args=`getopt -n $prog -o igchdt: -- "$@"`
+if test $? != 0; then
+		usage
+		exit 1
+fi
+
+opmode=install	# operation: install, sha1sum, sha1check
+drflag=false	# dry run
+sha1file=sha1sum.txt
+targetdir=
+
+set -- $(eval echo "$args")
+for i in $*
+do
+	case "$i" in
+	-i)	shift; opmode=install;;
+	-g)	shift; opmode=sha1sum;;
+	-c)	shift; opmode=sha1check;;
+
+	-h)	shift; usage; exit;;
+	-d)	shift; drflag=true;;
+	-t)
+		shift
+		targetdir="$1"; shift
+		;;
+	--)	shift;;
+	esac
+done
+
+if test -z "$targetdir"; then
+	warn option -t targetdir required
+	usage
+fi
+
+case "$opmode" in
+install)
+	# fall through
+	;;
+
+sha1sum)
+	(
+	cd $targetdir;
+	rm -f $sha1file && sha1sum -b `find -type f` > $sha1file;
+	chmod 400 $sha1file
+	)
+	exit
+	;;
+
+sha1check)
+	if ! test -r $targetdir/$sha1file; then
+		echo "XtratuM integrity NOT verified: \"$targetdir/$sha1file\" not found"
+		exit
+	else
+		if (cd $targetdir; sha1sum -c $sha1file >/dev/null); then
+			echo "XtratuM integrity verified using \"$targetdir/$sha1file\""
+			exit
+		else
+			echo XtratuM integrity corrupted: sha1sum missmatch:
+			(cd $targetdir; sha1sum -c $sha1file) | grep -v OK
+			exit -1
+		fi
+	fi
+	;;
+
+*)
+	usage
+	exit -1
+	;;	
+esac
+
+# installation
+
+if test -z "$ARCH"; then
+	eprint '$ARCH variable does not exist'
+fi
+
+if test -e $targetdir; then
+	eprint error: target dir $targetdir already exists
+fi
+
+# installation
+
+install -m 755 -d $targetdir/user/examples
+for e in ${EXAMPLES[@]}; do
+	if test -d $e; then
+		install -m 755 -d $targetdir/$e
+	elif test -x $e; then
+		install -m 755 $e $targetdir/$e
+	else
+		install -m 644 $e $targetdir/$e
+	fi
+done
+
+#(cd $targetdir/user; tar cjf ../xm-examples.tar.bz2 examples)
+mv $targetdir/user/examples/* $targetdir
+rm -r $targetdir/user
+
