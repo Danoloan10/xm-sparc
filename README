@@ -1,11 +1,14 @@
-
-
 = Directory structure =
 
 core:     The source code of the XtratuM hypervisor.
 scripts:  Helping tools to configure XtratuM source code.
 user:     User space utilities (libxm, tools, examples, etc).
 
+= Build instructions =
 
-
-
+In order to build XtratuM, first configure the build by setting the appropriate
+variables in the xmconfig.sparc file. There, set TARGET_CCPATH to the root of
+the SPARC compiler toolchain. You may configure flags and prefixes as well. Then,
+copy `xmconfig.sparc` to `xmconfig`, and run `make menuconfig`. Go through the
+steps to configure all the three components, exiting each prompt to continue.
+Lastly, run make to build XtratuM.
